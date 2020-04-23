@@ -15,11 +15,11 @@ namespace filtersView
     [Regeneration(RegenerationOption.Manual)]
     public class ExternalEventHandler : IExternalEventHandler
     {
-        public Model RevitModel;
+        public Model _revitModel;
         private Document _document;
         public ExternalEventHandler(Model model)
         {
-            this.RevitModel = model;
+            this._revitModel = model;
         }
         public void Execute(UIApplication uiapp)
         {
@@ -29,7 +29,7 @@ namespace filtersView
             using (var transact = new Transaction(_document, "Apply new filters to selected Views"))
             {
                 transact.Start();
-                SetFiltersToView(RevitModel.FiltersView.Where(x=>x.IsSelected), RevitModel.Views.Where(x=>x.IsSelected));
+                SetFiltersToView(_revitModel.FiltersView.Where(x=>x.IsSelected), _revitModel.Views.Where(x=>x.IsSelected));
                 transact.Commit();
             }
         }
@@ -57,7 +57,10 @@ namespace filtersView
                                     viewset.AddFilter(jfilter.ModelId);
                                     viewset.SetFilterOverrides(jfilter.ModelId, _document.ActiveView.GetFilterOverrides(jfilter.ModelId));
                                 }
-                                catch { }
+                                catch (Exception exc)
+                                {
+                                    TaskDialog.Show("Error",exc.Message);
+                                }
                             }
                             else
                             {
@@ -66,7 +69,10 @@ namespace filtersView
                                     viewset.AddFilter(jfilter.ModelId);
                                     viewset.SetFilterOverrides(jfilter.ModelId, _document.ActiveView.GetFilterOverrides(jfilter.ModelId));
                                 }
-                                catch { }
+                                catch (Exception exc)                               
+                                {
+                                    TaskDialog.Show("Error", exc.Message);
+                                }
                             }
                         }
                     }
@@ -77,7 +83,10 @@ namespace filtersView
                             viewset.AddFilter(jfilter.ModelId);
                             viewset.SetFilterOverrides(jfilter.ModelId, _document.ActiveView.GetFilterOverrides(jfilter.ModelId));
                         }
-                        catch { }
+                        catch (Exception exc)
+                        {
+                            TaskDialog.Show("Error", exc.Message);
+                        }
                     }
                 }
             }

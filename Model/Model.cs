@@ -14,10 +14,10 @@ namespace filtersView
     [Regeneration(RegenerationOption.Manual)]
     public class Model
     {
-        private static UIApplication UIAPP = null;
-        private static Application APP = null;
-        private static UIDocument UIDOC = null;
-        private static Document DOC = null;
+        private static UIApplication _uiapp;
+        private static Application _app;
+        private static UIDocument _uidoc;
+        private static Document _doc;
         private ObservableCollection<ElementItem> _filtersView;
         private ObservableCollection<ElementItem> _views;
 
@@ -25,44 +25,31 @@ namespace filtersView
         public ObservableCollection<ElementItem> Views { get { return _views; } set { _views = value; } }
         public Model(UIApplication uiapp)
         {
-            UIAPP = uiapp;
-            APP = UIAPP.Application;
-            UIDOC = UIAPP.ActiveUIDocument;
-            DOC = UIDOC.Document;
+            _uiapp = uiapp;
+            _app = _uiapp.Application;
+            _uidoc = _uiapp.ActiveUIDocument;
+            _doc = _uidoc.Document;
             FiltersView = GetFiltersView();
             Views = GetViews();
         }
         private ObservableCollection<ElementItem> GetViews()
         {
-            ObservableCollection<ElementItem> elementItems = new ObservableCollection<ElementItem>();
             List<BuiltInCategory> builtInCategory = new List<BuiltInCategory>();
             builtInCategory.Add(BuiltInCategory.OST_Views);
 
             ElementMulticategoryFilter multuFilter = new ElementMulticategoryFilter(builtInCategory);
-            IList<Element> elements = new FilteredElementCollector(DOC).WherePasses(multuFilter).WhereElementIsNotElementType().ToElements();
-            foreach (var element in elements)
-            {
-                ElementItem elementItem = new ElementItem();
-                elementItem.ModelId = element.Id;
-                elementItem.ItemName = element.Name;
-                elementItems.Add(elementItem);
-            }
-            return elementItems;
+            var elements = new FilteredElementCollector(_doc)
+                .WherePasses(multuFilter)
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Select(x => new ElementItem(x.Id, x.Name))
+                .Convert<ElementItem>();
+            return elements;
         }
         private ObservableCollection<ElementItem> GetFiltersView()
         {
-            ObservableCollection<ElementItem> elementItems = new ObservableCollection<ElementItem>();
-            var filterViews = DOC.ActiveView.GetFilters().ToList().ConvertAll(x => DOC.GetElement(x));
-            foreach (var filterView in filterViews)
-            {
-                var elementItem = new ElementItem();
-                elementItem.ItemName = filterView.Name;
-                elementItem.ModelId = filterView.Id;
-                elementItems.Add(elementItem);
-            }
-            return elementItems;
+            return _doc.ActiveView.GetFilters().ToList().ConvertAll(x => _doc.GetElement(x)).Select(x => new ElementItem(x.Id, x.Name)).Convert<ElementItem>();
         }
-
     }
 
 }

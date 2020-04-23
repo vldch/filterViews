@@ -16,7 +16,7 @@ namespace filtersView
             set
             {
                 _modelId = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(ModelId));
             }
         }
         public string ItemName
@@ -25,7 +25,7 @@ namespace filtersView
             set
             {
                 _itemName = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(ItemName));
             }
         }
         public bool IsSelected
@@ -38,13 +38,17 @@ namespace filtersView
                 new PropertyChangedEventArgs(nameof(IsSelected)));
             }
         }
+        public ElementItem(ElementId id,string name)
+        {
+            ModelId = id;
+            ItemName = name;
+        }
         protected void OnPropertyChanged([CallerMemberName] string name = "")
         {
             PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null)
                 handler(this, new PropertyChangedEventArgs(name));
         }
-
         public event PropertyChangedEventHandler PropertyChanged;
     }
 }
